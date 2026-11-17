@@ -8,6 +8,7 @@ member_view = Blueprint('user_routes', __name__, template_folder='/templates')
 
 member_controller = MemberController(DAO)
 
+
 @member_view.route('/', methods=['GET'])
 def home():
 	g.bg = 1
