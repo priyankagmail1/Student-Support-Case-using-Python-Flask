@@ -1,3 +1,5 @@
 # Student-Support-Case-using-Python-Flask
 How the architectural refactoring and hardening process went for this Python Flask Student Support Service management system by using the PBKDF2-HMAC algorithm 
+
+
 **Abstract -** This is a comprehensive report which gives an idea of how the architectural refactoring and hardening process went for this Python Flask Student Support Service management system. To get the most out of maintaining, structuring and securing data for this project-assignment, I have changed my approach of designing data access objects to controller approach using repository managers and database façade. Necessary measures have been taken, including password hashing by using the PBKDF2-HMAC algorithm and strict restriction of roles on the basis of sessions for dealing with STRIDE attacks. Trust boundaries and regulations, and the associated risks with tradeoffs, have been analyzed in order to frame an enterprise-level software system.
