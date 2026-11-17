@@ -1,0 +1,62 @@
+from flask import Flask, session, request, jsonify, abort
+import hmac
+import hashlib
+
+app = Flask(__name__)
+# Cryptographic secret key protecting Flask session cookies from tampering
+app.secret_key = "production_lms_secure_cryptographic_secret_key"
+HMAC_SIGNING_SECRET = b"data_integrity_hmac_secret_key"
+
+def generate_payload_signature(payload_data):
+    """Generates an HMAC-SHA256 signature for data payload verification."""
+    return hmac.new(HMAC_SIGNING_SECRET, payload_data.encode('utf-8'), hashlib.sha256).hexdigest()
+
+def verify_payload_signature(payload_data, client_signature):
+    """Safely verifies client signatures using constant-time comparison to prevent timing attacks."""
+    expected_signature = generate_payload_signature(payload_data)
+    return hmac.compare_digest(expected_signature, client_signature)
+
+@app.route('/api/member/signin', methods=['POST'])
+def member_signin():
+    incoming_data = request.get_json() or {}
+    email = incoming_data.get('email', '')
+    
+    # Authenticate member credentials against the database repository...
+    if email == "hamza@gmail.com":
+        # Store verified member ID inside Flask's cryptographically signed session
+        session['user_id'] = 1
+        session['role'] = 'library_member'
+        
+        # Generate an integrity token for subsequent client requests
+        integrity_token = generate_payload_signature("user_session_active")
+        
+        return jsonify({
+            "status": "success",
+            "message": "Authentication successful.",
+            "integrity_token": integrity_token
+        }), 200
+        
+    return jsonify({"error": "Invalid authentication credentials"}), 401
+
+@app.route('/api/books/reserve', methods=['POST'])
+def secure_book_reservation():
+    # 1. Enforce session authentication (prevents session spoofing)
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized. Active session required."}), 403
+        
+    request_payload = request.get_json() or {}
+    action_context = request_payload.get('context', '')
+    client_signature = request_payload.get('signature', '')
+    
+    # 2. Verify payload integrity via HMAC validation (prevents data spoofing & tampering)
+    if not client_signature or not verify_payload_signature(action_context, client_signature):
+        abort(400, description="Security alert: Data spoofing or payload tampering detected!")
+        
+    return jsonify({
+        "status": "success",
+        "member_id": session['user_id'],
+        "message": "Book reservation processed securely with verified integrity."
+    }), 200
+
+if __name__ == '__main__':
+    app.run(debug=False)
