@@ -1,5 +1,6 @@
 from App.User import User
 
+
 class MemberController():
     def __init__(self, database_gateway):
         self.member_entity = User(database_gateway.db.user)
@@ -60,3 +61,4 @@ class MemberController():
 
     def fetch_book_borrowers(self, target_book_id):
         return self.member_repository.getUsersByBook(target_book_id)
+
