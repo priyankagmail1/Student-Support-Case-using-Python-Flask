@@ -11,6 +11,7 @@ def compute_bytes_hash(input_string):
     derived_digest = hashlib.pbkdf2_hmac('sha256', b'password', encryption_salt, 100000)
     return binascii.hexlify(derived_digest)
     
+    
 def calculate_time_ago(target_date):
     """
         Calculate a '3 hours ago' type string from a python datetime.
